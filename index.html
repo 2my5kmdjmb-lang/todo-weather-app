@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo应用</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .app-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #000000;
+        }
+
+        .weather-widget {
+            background-color: transparent;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            color: #000000;
+            text-align: center;
+        }
+
+        .weather-location {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+            color: #000000;
+        }
+
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .weather-temp {
+            font-size: 3rem;
+            font-weight: 300;
+            color: #000000;
+        }
+
+        .weather-icon {
+            font-size: 3rem;
+        }
+
+        .weather-description {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            text-transform: capitalize;
+            color: #000000;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .weather-detail {
+            text-align: center;
+        }
+
+        .weather-detail-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            color: #000000;
+        }
+
+        .weather-detail-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #000000;
+        }
+
+        .weather-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #000000;
+        }
+
+        .weather-error {
+            background: transparent;
+            color: #000000;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .add-task-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .task-input {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid #000000;
+            border-radius: 8px;
+            background-color: #ffffff;
+            color: #000000;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .task-input:focus {
+            border-color: #000000;
+            border-width: 2px;
+        }
+
+        .task-input::placeholder {
+            color: #666666;
+        }
+
+        .add-button {
+            padding: 1rem 1.5rem;
+            background-color: #000000;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-button:hover {
+            background-color: #333333;
+        }
+
+        .task-list-container {
+            min-height: 200px;
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            background-color: #f8f8f8;
+        }
+
+        .task-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 1rem;
+            cursor: pointer;
+        }
+
+        .task-label {
+            flex: 1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-item.completed .task-label {
+            text-decoration: line-through;
+            opacity: 0.5;
+            color: #666666;
+        }
+
+        .delete-button {
+            padding: 0.5rem;
+            background-color: transparent;
+            color: #000000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666666;
+            display: none;
+        }
+
+        .empty-state.show {
+            display: block;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem 0.5rem;
+            }
+            
+            .app-header h1 {
+                font-size: 2rem;
+            }
+            
+            .add-task-form {
+                flex-direction: column;
+            }
+            
+            .add-button {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>Todo & 天气</h1>
+        </header>
+        
+        <main class="app-main">
+            <div class="weather-widget" id="weatherWidget">
+                <div class="weather-loading" id="weatherLoading">
+                    正在获取天气信息...
+                </div>
+            </div>
+            <form class="add-task-form" id="addTaskForm">
+                <input 
+                    type="text" 
+                    class="task-input" 
+                    id="taskInput"
+                    placeholder="添加新任务..."
+                    autocomplete="off"
+                >
+                <button type="submit" class="add-button">添加</button>
+            </form>
+            
+            <div class="task-list-container">
+                <ul class="task-list" id="taskList"></ul>
+                <div class="empty-state" id="emptyState">
+                    <p>还没有任务，在上面添加一个开始吧！</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 天气管理器
+        class WeatherManager {
+            constructor() {
+                this.apiKey = 'demo'; // 使用演示数据
+                this.currentWeather = null;
+            }
+
+            async getCurrentWeather() {
+                try {
+                    // 获取用户位置
+                    const position = await this.getCurrentPosition();
+                    const { latitude, longitude } = position.coords;
+                    
+                    // 模拟天气数据（实际应用中应该调用真实的天气API）
+                    const weatherData = this.getMockWeatherData(latitude, longitude);
+                    this.currentWeather = weatherData;
+                    return weatherData;
+                } catch (error) {
+                    console.error('获取天气失败:', error);
+                    throw new Error('无法获取天气信息');
+                }
+            }
+
+            getCurrentPosition() {
+                return new Promise((resolve, reject) => {
+                    if (!navigator.geolocation) {
+                        reject(new Error('浏览器不支持地理定位'));
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        resolve,
+                        (error) => {
+                            switch (error.code) {
+                                case error.PERMISSION_DENIED:
+                                    reject(new Error('用户拒绝了地理定位请求'));
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    reject(new Error('位置信息不可用'));
+                                    break;
+                                case error.TIMEOUT:
+                                    reject(new Error('获取位置超时'));
+                                    break;
+                                default:
+                                    reject(new Error('获取位置时发生未知错误'));
+                                    break;
+                            }
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 300000 // 5分钟缓存
+                        }
+                    );
+                });
+            }
+
+            getMockWeatherData(lat, lon) {
+                // 模拟不同城市的天气数据
+                const cities = [
+                    { name: '北京', temp: 22, desc: '晴朗', icon: '☀️', humidity: 45, wind: 12, pressure: 1013 },
+                    { name: '上海', temp: 26, desc: '多云', icon: '⛅', humidity: 68, wind: 8, pressure: 1015 },
+                    { name: '广州', temp: 29, desc: '小雨', icon: '🌧️', humidity: 78, wind: 15, pressure: 1008 },
+                    { name: '深圳', temp: 28, desc: '阴天', icon: '☁️', humidity: 72, wind: 10, pressure: 1012 }
+                ];
+                
+                const randomCity = cities[Math.floor(Math.random() * cities.length)];
+                
+                return {
+                    location: randomCity.name,
+                    temperature: randomCity.temp,
+                    description: randomCity.desc,
+                    icon: randomCity.icon,
+                    humidity: randomCity.humidity,
+                    windSpeed: randomCity.wind,
+                    pressure: randomCity.pressure,
+                    timestamp: new Date().toISOString()
+                };
+            }
+
+            getWeatherIcon(description) {
+                const iconMap = {
+                    '晴朗': '☀️',
+                    '多云': '⛅',
+                    '阴天': '☁️',
+                    '小雨': '🌧️',
+                    '大雨': '⛈️',
+                    '雪': '❄️',
+                    '雾': '🌫️'
+                };
+                return iconMap[description] || '🌤️';
+            }
+        }
+
+        // 天气UI管理器
+        class WeatherUIManager {
+            constructor() {
+                this.weatherWidget = document.getElementById('weatherWidget');
+                this.weatherLoading = document.getElementById('weatherLoading');
+            }
+
+            showLoading() {
+                this.weatherWidget.innerHTML = `
+                    <div class="weather-loading">
+                        正在获取天气信息...
+                    </div>
+                `;
+            }
+
+            showError(message) {
+                this.weatherWidget.innerHTML = `
+                    <div class="weather-error">
+                        ${message}
+                        <br>
+                        <button onclick="todoApp.loadWeather()" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #000000; border: 1px solid #000000; border-radius: 4px; color: #ffffff; cursor: pointer;">
+                            重试
+                        </button>
+                    </div>
+                `;
+            }
+
+            renderWeather(weather) {
+                this.weatherWidget.innerHTML = `
+                    <div class="weather-location">${weather.location}</div>
+                    <div class="weather-main">
+                        <div class="weather-temp">${weather.temperature}°C</div>
+                        <div class="weather-icon">${weather.icon}</div>
+                    </div>
+                    <div class="weather-description">${weather.description}</div>
+                    <div class="weather-details">
+                        <div class="weather-detail">
+                            <div class="weather-detail-label">湿度</div>
+                            <div class="weather-detail-value">${weather.humidity}%</div>
+                        </div>
+                        <div class="weather-detail">
+                            <div class="weather-detail-label">风速</div>
+                            <div class="weather-detail-value">${weather.windSpeed}km/h</div>
+                        </div>
+                        <div class="weather-detail">
+                            <div class="weather-detail-label">气压</div>
+                            <div class="weather-detail-value">${weather.pressure}hPa</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        class TaskManager {
+            constructor() {
+                this.tasks = new Map();
+            }
+
+            createTask(text) {
+                if (!text || !text.trim()) {
+                    return null;
+                }
+                
+                const task = {
+                    id: 'task-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                    text: text.trim(),
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.tasks.set(task.id, task);
+                return task;
+            }
+
+            deleteTask(taskId) {
+                return this.tasks.delete(taskId);
+            }
+
+            toggleTask(taskId) {
+                const task = this.tasks.get(taskId);
+                if (task) {
+                    task.completed = !task.completed;
+                    return task;
+                }
+                return null;
+            }
+
+            getAllTasks() {
+                return Array.from(this.tasks.values());
+            }
+
+            getTask(taskId) {
+                return this.tasks.get(taskId);
+            }
+
+            loadTasks(tasksData) {
+                this.tasks.clear();
+                if (Array.isArray(tasksData)) {
+                    tasksData.forEach(task => {
+                        this.tasks.set(task.id, task);
+                    });
+                }
+            }
+        }
+
+        // 存储管理器
+        class StorageManager {
+            constructor() {
+                this.storageKey = 'todo-app-tasks';
+            }
+
+            saveTasks(tasks) {
+                try {
+                    const data = JSON.stringify(tasks);
+                    localStorage.setItem(this.storageKey, data);
+                    return true;
+                } catch (error) {
+                    console.error('保存任务失败:', error);
+                    return false;
+                }
+            }
+
+            loadTasks() {
+                try {
+                    const data = localStorage.getItem(this.storageKey);
+                    return data ? JSON.parse(data) : [];
+                } catch (error) {
+                    console.error('加载任务失败:', error);
+                    return [];
+                }
+            }
+
+            clearTasks() {
+                try {
+                    localStorage.removeItem(this.storageKey);
+                    return true;
+                } catch (error) {
+                    console.error('清除任务失败:', error);
+                    return false;
+                }
+            }
+        }
+
+        // UI管理器
+        class UIManager {
+            constructor() {
+                this.taskList = document.getElementById('taskList');
+                this.emptyState = document.getElementById('emptyState');
+                this.taskInput = document.getElementById('taskInput');
+            }
+
+            renderTasks(tasks) {
+                this.taskList.innerHTML = '';
+                
+                if (tasks.length === 0) {
+                    this.showEmptyState();
+                    return;
+                }
+
+                this.hideEmptyState();
+                tasks.forEach(task => {
+                    this.renderTask(task);
+                });
+            }
+
+            renderTask(task) {
+                const taskItem = document.createElement('li');
+                taskItem.className = `task-item fade-in ${task.completed ? 'completed' : ''}`;
+                taskItem.dataset.taskId = task.id;
+
+                taskItem.innerHTML = `
+                    <div class="task-content" onclick="todoApp.handleToggleTask('${task.id}')">
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+                        <label class="task-label">${this.escapeHtml(task.text)}</label>
+                    </div>
+                    <button class="delete-button" onclick="todoApp.handleDeleteTask('${task.id}')" title="删除任务">
+                        ×
+                    </button>
+                `;
+
+                this.taskList.appendChild(taskItem);
+            }
+
+            updateTaskDisplay(task) {
+                const taskItem = document.querySelector(`[data-task-id="${task.id}"]`);
+                if (taskItem) {
+                    const checkbox = taskItem.querySelector('.task-checkbox');
+                    checkbox.checked = task.completed;
+                    
+                    if (task.completed) {
+                        taskItem.classList.add('completed');
+                    } else {
+                        taskItem.classList.remove('completed');
+                    }
+                }
+            }
+
+            removeTaskFromUI(taskId) {
+                const taskItem = document.querySelector(`[data-task-id="${taskId}"]`);
+                if (taskItem) {
+                    taskItem.remove();
+                }
+            }
+
+            showEmptyState() {
+                this.emptyState.classList.add('show');
+            }
+
+            hideEmptyState() {
+                this.emptyState.classList.remove('show');
+            }
+
+            clearInput() {
+                this.taskInput.value = '';
+            }
+
+            focusInput() {
+                this.taskInput.focus();
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // 主应用控制器
+        class TodoApp {
+            constructor() {
+                this.taskManager = new TaskManager();
+                this.storageManager = new StorageManager();
+                this.uiManager = new UIManager();
+                this.weatherManager = new WeatherManager();
+                this.weatherUIManager = new WeatherUIManager();
+            }
+
+            async init() {
+                // 加载保存的任务
+                const savedTasks = this.storageManager.loadTasks();
+                this.taskManager.loadTasks(savedTasks);
+                
+                // 渲染任务列表
+                this.uiManager.renderTasks(this.taskManager.getAllTasks());
+                
+                // 绑定事件
+                this.bindEvents();
+                
+                // 聚焦输入框
+                this.uiManager.focusInput();
+
+                // 加载天气信息
+                await this.loadWeather();
+            }
+
+            async loadWeather() {
+                try {
+                    this.weatherUIManager.showLoading();
+                    const weather = await this.weatherManager.getCurrentWeather();
+                    this.weatherUIManager.renderWeather(weather);
+                } catch (error) {
+                    console.error('天气加载失败:', error);
+                    this.weatherUIManager.showError(error.message);
+                }
+            }
+
+            bindEvents() {
+                const form = document.getElementById('addTaskForm');
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleAddTask();
+                });
+            }
+
+            handleAddTask() {
+                const input = document.getElementById('taskInput');
+                const text = input.value.trim();
+                
+                if (!text) {
+                    return;
+                }
+
+                const task = this.taskManager.createTask(text);
+                if (task) {
+                    this.uiManager.hideEmptyState();
+                    this.uiManager.renderTask(task);
+                    this.uiManager.clearInput();
+                    this.uiManager.focusInput();
+                    this.saveToStorage();
+                }
+            }
+
+            handleToggleTask(taskId) {
+                const task = this.taskManager.toggleTask(taskId);
+                if (task) {
+                    this.uiManager.updateTaskDisplay(task);
+                    this.saveToStorage();
+                }
+            }
+
+            handleDeleteTask(taskId) {
+                if (this.taskManager.deleteTask(taskId)) {
+                    this.uiManager.removeTaskFromUI(taskId);
+                    
+                    // 检查是否需要显示空状态
+                    const remainingTasks = this.taskManager.getAllTasks();
+                    if (remainingTasks.length === 0) {
+                        this.uiManager.showEmptyState();
+                    }
+                    
+                    this.saveToStorage();
+                }
+            }
+
+            saveToStorage() {
+                const tasks = this.taskManager.getAllTasks();
+                this.storageManager.saveTasks(tasks);
+            }
+        }
+
+        // 初始化应用
+        const todoApp = new TodoApp();
+        document.addEventListener('DOMContentLoaded', async () => {
+            await todoApp.init();
+        });
+    </script>
+</body>
+</html>
