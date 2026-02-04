@@ -100,17 +100,16 @@ const NewsWidget: React.FC = () => {
         </form>
       )}
 
-      <div className="news-list">
-        {articles.map(article => (
-          <div key={article.id} className="news-item">
-            <div className="news-content">
-              <div className="news-meta">
-                <span className="news-source">{article.source}</span>
-                <span className="news-category">{article.category}</span>
-                <span className="news-time">{formatDate(article.publishedAt)}</span>
+      <div className="news-grid">
+        {articles.slice(0, 4).map(article => (
+          <div key={article.id} className="news-card">
+            <div className="news-card-content">
+              <div className="news-card-meta">
+                <span className="news-card-source">{article.source}</span>
+                <span className="news-card-time">{formatDate(article.publishedAt)}</span>
               </div>
-              <h3 className="news-title">{article.title}</h3>
-              <p className="news-summary">{article.summary}</p>
+              <h3 className="news-card-title">{article.title.length > 30 ? article.title.substring(0, 30) + '...' : article.title}</h3>
+              <p className="news-card-summary">{article.summary.length > 60 ? article.summary.substring(0, 60) + '...' : article.summary}</p>
             </div>
           </div>
         ))}

@@ -189,18 +189,87 @@ export class MockWeatherService implements WeatherService {
   private generateWeatherData(cityData: any): WeatherData {
     // 添加随机变化
     const tempVariation = Math.random() * 6 - 3; // -3 到 +3
-    const humidityVariation = Math.floor(Math.random() * 21) - 10; // -10 到 +10
     const windVariation = Math.random() * 4 - 2; // -2 到 +2
+    const currentTemp = Math.round((cityData.temp + tempVariation) * 10) / 10;
+    
+    // 生成7天预报
+    const forecast = this.generateForecast(cityData);
     
     return {
       location: cityData.name,
-      temperature: Math.round((cityData.temp + tempVariation) * 10) / 10,
+      temperature: currentTemp,
       description: cityData.desc,
       icon: cityData.icon,
-      humidity: Math.max(0, Math.min(100, cityData.humidity + humidityVariation)),
+      windDirection: this.getWindDirection(),
       windSpeed: Math.max(0, Math.round((cityData.wind + windVariation) * 10) / 10),
-      pressure: cityData.pressure,
-      timestamp: new Date()
+      clothingRecommendation: this.getClothingRecommendation(currentTemp, cityData.desc),
+      timestamp: new Date(),
+      forecast
     };
+  }
+
+  private getWindDirection(): string {
+    const directions = ['北风', '东北风', '东风', '东南风', '南风', '西南风', '西风', '西北风'];
+    return directions[Math.floor(Math.random() * directions.length)];
+  }
+
+  private getClothingRecommendation(temperature: number, weather: string): string {
+    if (temperature >= 30) {
+      return weather.includes('雨') ? '短袖+雨具' : '短袖短裤';
+    } else if (temperature >= 25) {
+      return weather.includes('雨') ? '薄长袖+雨具' : '短袖长裤';
+    } else if (temperature >= 20) {
+      return weather.includes('雨') ? '长袖+外套+雨具' : '长袖衬衫';
+    } else if (temperature >= 15) {
+      return weather.includes('雨') ? '薄外套+雨具' : '薄外套';
+    } else if (temperature >= 10) {
+      return weather.includes('雨') ? '厚外套+雨具' : '厚外套';
+    } else if (temperature >= 5) {
+      return weather.includes('雨') ? '棉衣+雨具' : '棉衣毛衣';
+    } else {
+      return weather.includes('雪') ? '羽绒服+防滑鞋' : '羽绒服';
+    }
+  }
+
+  private generateForecast(cityData: any): any[] {
+    const forecast = [];
+    const weatherTypes = [
+      { desc: '晴朗', icon: '☀️' },
+      { desc: '多云', icon: '⛅' },
+      { desc: '阴天', icon: '☁️' },
+      { desc: '小雨', icon: '🌧️' },
+      { desc: '雷雨', icon: '⛈️' },
+      { desc: '雪', icon: '❄️' },
+      { desc: '雾', icon: '🌫️' }
+    ];
+
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    
+    for (let i = 1; i <= 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() + i);
+      
+      const weather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
+      const baseTemp = cityData.temp;
+      const tempVariation = Math.random() * 10 - 5; // -5 到 +5
+      const highTemp = Math.round(baseTemp + tempVariation + Math.random() * 3);
+      const lowTemp = Math.round(highTemp - Math.random() * 8 - 3); // 比最高温低3-11度
+      
+      forecast.push({
+        date: date.toISOString().split('T')[0],
+        dayOfWeek: weekdays[date.getDay()],
+        temperature: {
+          high: highTemp,
+          low: lowTemp
+        },
+        description: weather.desc,
+        icon: weather.icon,
+        windDirection: this.getWindDirection(),
+        windSpeed: Math.floor(Math.random() * 15) + 3, // 3-18 km/h
+        clothingRecommendation: this.getClothingRecommendation(highTemp, weather.desc)
+      });
+    }
+    
+    return forecast;
   }
 }

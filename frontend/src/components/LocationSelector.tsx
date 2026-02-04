@@ -47,7 +47,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
           disabled={loading}
           title="选择地区"
         >
-          🌍 选择地区
+          🌍 {loading ? '正在查询...' : '选择地区'}
         </button>
         <button 
           className="location-btn auto-location-btn"
@@ -55,7 +55,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
           disabled={loading}
           title="使用当前位置"
         >
-          📍 当前位置
+          📍 {loading ? '正在查询...' : '当前位置'}
         </button>
       </div>
 

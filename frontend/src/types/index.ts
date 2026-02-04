@@ -7,15 +7,30 @@ export interface Task {
   updatedAt?: Date;
 }
 
+export interface DailyWeather {
+  date: string;
+  dayOfWeek: string;
+  temperature: {
+    high: number;
+    low: number;
+  };
+  description: string;
+  icon: string;
+  windDirection: string;
+  windSpeed: number;
+  clothingRecommendation: string;
+}
+
 export interface WeatherData {
   location: string;
   temperature: number;
   description: string;
   icon: string;
-  humidity: number;
+  windDirection: string;
   windSpeed: number;
-  pressure: number;
+  clothingRecommendation: string;
   timestamp: Date;
+  forecast: DailyWeather[];
 }
 
 export interface WeatherService {

@@ -56,6 +56,11 @@ const WeatherWidget: React.FC = () => {
   if (loading) {
     return (
       <div className="weather-widget">
+        <LocationSelector
+          onLocationSelect={handleLocationSelect}
+          onLocationRequest={handleGeolocationRequest}
+          loading={loading}
+        />
         <div className="weather-loading">
           正在获取天气信息...
         </div>
@@ -132,24 +137,56 @@ const WeatherWidget: React.FC = () => {
         </form>
       )}
 
-      <div className="weather-main">
-        <div className="weather-temp">{weather.temperature}°C</div>
-        <div className="weather-icon">{weather.icon}</div>
-      </div>
-      <div className="weather-description">{weather.description}</div>
-      <div className="weather-details">
-        <div className="weather-detail">
-          <div className="weather-detail-label">湿度</div>
-          <div className="weather-detail-value">{weather.humidity}%</div>
+      <div className="weather-all-days">
+        <div className="weather-day-column">
+          <h3 className="weather-section-title">今天</h3>
+          <div className="weather-details">
+            <div className="weather-detail">
+              <div className="weather-detail-label">温度</div>
+              <div className="weather-detail-value">{weather.temperature}°C</div>
+            </div>
+            <div className="weather-detail">
+              <div className="weather-detail-label">天气</div>
+              <div className="weather-detail-value">{weather.description}</div>
+            </div>
+            <div className="weather-detail">
+              <div className="weather-detail-label">风向</div>
+              <div className="weather-detail-value">{weather.windDirection} {weather.windSpeed}km/h</div>
+            </div>
+            <div className="weather-detail">
+              <div className="weather-detail-label">穿衣建议</div>
+              <div className="weather-detail-value">{weather.clothingRecommendation}</div>
+            </div>
+          </div>
         </div>
-        <div className="weather-detail">
-          <div className="weather-detail-label">风速</div>
-          <div className="weather-detail-value">{weather.windSpeed}km/h</div>
-        </div>
-        <div className="weather-detail">
-          <div className="weather-detail-label">气压</div>
-          <div className="weather-detail-value">{weather.pressure}hPa</div>
-        </div>
+
+        {weather.forecast && weather.forecast.length > 0 && (
+          <>
+            {weather.forecast.map((day, index) => (
+              <div key={day.date} className="weather-day-column">
+                <h3 className="weather-section-title">{index === 0 ? '明天' : day.dayOfWeek}</h3>
+                <div className="weather-details">
+                  <div className="weather-detail">
+                    <div className="weather-detail-label">温度</div>
+                    <div className="weather-detail-value">{day.icon} {day.temperature.high}°/{day.temperature.low}°</div>
+                  </div>
+                  <div className="weather-detail">
+                    <div className="weather-detail-label">天气</div>
+                    <div className="weather-detail-value">{day.description}</div>
+                  </div>
+                  <div className="weather-detail">
+                    <div className="weather-detail-label">风向</div>
+                    <div className="weather-detail-value">{day.windDirection} {day.windSpeed}km/h</div>
+                  </div>
+                  <div className="weather-detail">
+                    <div className="weather-detail-label">穿衣建议</div>
+                    <div className="weather-detail-value">{day.clothingRecommendation}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
       </div>
     </div>
   );
